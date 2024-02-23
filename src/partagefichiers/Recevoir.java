@@ -6,8 +6,10 @@ package partagefichiers;
 
 import java.io.*;
 import java.net.*;
+import javax.swing.JOptionPane;
 
 public class Recevoir {
+
     private static final String DEFAULT_DOWNLOAD_FOLDER = System.getProperty("user.home") + File.separator + "Downloads";
 
     public static void main(String[] args) {
@@ -20,9 +22,16 @@ public class Recevoir {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connecté depuis : " + clientSocket.getInetAddress());
 
-                // Gérer la connexion client dans un thread séparé
-                Thread clientThread = new Thread(new ClientHandler(clientSocket));
-                clientThread.start();
+                // Lire le nom de la machine de l'expéditeur et demander confirmation dans le thread principal
+                DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+                String senderHostName = dis.readUTF();
+                int confirmation = JOptionPane.showConfirmDialog(null, "Voulez-vous recevoir le fichier de " + senderHostName + " ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+
+                if (confirmation == JOptionPane.YES_OPTION) {
+                    // Gérer la connexion client dans un thread séparé
+                    Thread clientThread = new Thread(new ClientHandler(clientSocket));
+                    clientThread.start();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -30,6 +39,7 @@ public class Recevoir {
     }
 
     private static class ClientHandler implements Runnable {
+
         private final Socket clientSocket;
 
         public ClientHandler(Socket clientSocket) {
