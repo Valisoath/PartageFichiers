@@ -22,15 +22,30 @@ public class Recevoir {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connecté depuis : " + clientSocket.getInetAddress());
 
-                // Lire le nom de la machine de l'expéditeur et demander confirmation dans le thread principal
+                // Lire le code de l'expéditeur et demander confirmation dans le thread principal
                 DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
+                int randomCode = dis.readInt();
                 String senderHostName = dis.readUTF();
+
                 int confirmation = JOptionPane.showConfirmDialog(null, "Voulez-vous recevoir le fichier de " + senderHostName + " ?", "Confirmation", JOptionPane.YES_NO_OPTION);
 
                 if (confirmation == JOptionPane.YES_OPTION) {
-                    // Gérer la connexion client dans un thread séparé
-                    Thread clientThread = new Thread(new ClientHandler(clientSocket));
-                    clientThread.start();
+                    // Saisir le code du récepteur
+                    String enteredCodeStr = JOptionPane.showInputDialog(null, "Entrez le code de transfert reçu :", "Confirmation", JOptionPane.PLAIN_MESSAGE);
+
+                    try {
+                        int enteredCode = Integer.parseInt(enteredCodeStr.trim());
+
+                        if (enteredCode == randomCode) {
+                            // Gérer la connexion client dans un thread séparé
+                            Thread clientThread = new Thread(new ClientHandler(clientSocket));
+                            clientThread.start();
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Code incorrect. Le transfert est annulé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(null, "Code invalide. Le transfert est annulé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         } catch (IOException e) {

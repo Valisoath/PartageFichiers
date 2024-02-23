@@ -7,6 +7,7 @@ package partagefichiers;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
+import java.util.Random;
 
 public class Envoyer {
 
@@ -17,7 +18,7 @@ public class Envoyer {
             // Obtenir l'adresse IP locale de l'envoyeur
             InetAddress localAddress = InetAddress.getLocalHost();
             String senderIP = localAddress.getHostAddress();
-            
+
             // Obtenir le nom de la machine de l'envoyeur
             String senderHostName = InetAddress.getByName(senderIP).getHostName();
 
@@ -26,10 +27,19 @@ public class Envoyer {
             File selectedFile = chooseFile();
             try (Socket socket = new Socket(senderIP, PORT); FileInputStream fileInputStream = new FileInputStream(selectedFile)) {
 
-                // Envoyer le nom de la machine de l'envoyeur avant le fichier
+                // Générer un code aléatoire de 5 chiffres
+                int randomCode = generateRandomCode();
+
+                // Afficher le code dans une boîte de dialogue
+                JOptionPane.showMessageDialog(null, "Votre code de transfert est : " + randomCode, "Code de transfert", JOptionPane.INFORMATION_MESSAGE);
+
+                // Envoyer le code au récepteur
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                dos.writeInt(randomCode);
+
+                // Envoyer le nom de la machine de l'envoyeur avant le fichier
                 dos.writeUTF(senderHostName);
-                
+
                 // Obtenir le nom du fichier sans extension
                 String fileName = selectedFile.getName();
                 String extension = "";
@@ -58,6 +68,11 @@ public class Envoyer {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+    }
+
+    private static int generateRandomCode() {
+        Random random = new Random();
+        return 10000 + random.nextInt(90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
     }
 
     private static File chooseFile() {
