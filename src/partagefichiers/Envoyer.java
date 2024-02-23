@@ -11,22 +11,27 @@ import java.util.Random;
 
 public class Envoyer {
 
-    public static void main(String[] args) {
+    public void envoieFichier(JTabbedPane jTabbedPane1) {
 
-        try {
+        final int PORT = 9999;
 
-            // Obtenir l'adresse IP locale de l'envoyeur
+        // Afficher un message indiquant que l'envoyeur est en attente de récepteur
+        System.out.println("En attente de récepteur...");
+
+        try(ServerSocket serverSocket = new ServerSocket(PORT)) {
+
+            // Attendre une connexion pendant 20 secondes
+            serverSocket.setSoTimeout(20000); // 20 secondes
+            Socket clientSocket = serverSocket.accept();
+
+            // Si une connexion est établie, continuer le processus d'envoi
+            System.out.println("Récepteur connecté !");
             InetAddress localAddress = InetAddress.getLocalHost();
             String senderIP = localAddress.getHostAddress();
-
-            // Obtenir le nom de la machine de l'envoyeur
             String senderHostName = InetAddress.getByName(senderIP).getHostName();
 
-            final int PORT = 9999;
-
             File selectedFile = chooseFile();
-            try (Socket socket = new Socket(senderIP, PORT); FileInputStream fileInputStream = new FileInputStream(selectedFile)) {
-
+            try (FileInputStream fileInputStream = new FileInputStream(selectedFile)) {
                 // Générer un code aléatoire de 5 chiffres
                 int randomCode = generateRandomCode();
 
@@ -34,7 +39,7 @@ public class Envoyer {
                 JOptionPane.showMessageDialog(null, "Votre code de transfert est : " + randomCode, "Code de transfert", JOptionPane.INFORMATION_MESSAGE);
 
                 // Envoyer le code au récepteur
-                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
                 dos.writeInt(randomCode);
 
                 // Envoyer le nom de la machine de l'envoyeur avant le fichier
@@ -53,29 +58,30 @@ public class Envoyer {
                 dos.writeUTF(fileName);
                 dos.writeUTF(extension);
 
-                // Envoyer le contenu du fichier au serveur
+                // Envoyer le contenu du fichier au récepteur
                 byte[] buffer = new byte[8192];
                 int bytesRead;
-                OutputStream outputStream = socket.getOutputStream();
+                OutputStream outputStream = clientSocket.getOutputStream();
                 while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 System.out.println("Fichier envoyé avec succès !");
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                jTabbedPane1.setSelectedIndex(5);
             }
-        } catch (UnknownHostException e) {
+        } catch (SocketTimeoutException e) {
+            // Afficher un message d'erreur si aucun récepteur n'est connecté après 20 secondes
+            JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu dans les 20 secondes.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static int generateRandomCode() {
+    private int generateRandomCode() {
         Random random = new Random();
         return 10000 + random.nextInt(90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
     }
 
-    private static File chooseFile() {
+    private File chooseFile() {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
