@@ -7,25 +7,46 @@ package partagefichiers;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
-import java.util.Random;
 
 public class Envoyer {
 
-    public void envoieFichier(JTabbedPane jTabbedPane1) {
+    public static void main(String[] args) {
+        final int PORT = 9998; // Port de l'envoyeur
+        final int DISCOVERY_PORT = 9997; // Port de découverte
 
-        final int PORT = 9999;
+        try (DatagramSocket socket = new DatagramSocket()) {
+            // Émission du message de découverte
+            System.out.println("Attente d'un récepteur...");
+            byte[] requestData = "DISCOVER".getBytes();
+            DatagramPacket requestPacket = new DatagramPacket(requestData, requestData.length, InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT);
+            socket.send(requestPacket);
 
-        // Afficher un message indiquant que l'envoyeur est en attente de récepteur
-        System.out.println("En attente de récepteur...");
+            // Attente de la réponse du récepteur pendant 20 secondes
+            socket.setSoTimeout(20000); // 20 secondes
+            byte[] responseData = new byte[1024];
+            DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
+            try {
+                socket.receive(responsePacket);
+                String receiverIP = responsePacket.getAddress().getHostAddress();
 
-        try(ServerSocket serverSocket = new ServerSocket(PORT)) {
+                try (Socket serverSocket = new Socket(receiverIP, PORT)) {
+                    // Connexion établie avec le récepteur, envoyer des fichiers
+                    sendFiles(serverSocket);
+                }
+            } catch (SocketTimeoutException e) {
+                // Aucun récepteur connecté après 20 secondes
+                JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (IOException e) {
+//            e.printStackTrace();
+               JOptionPane.showMessageDialog(null, "Vérifier votre partage wifi", "Avertissement", JOptionPane.WARNING_MESSAGE);
+        }
+    }
 
-            // Attendre une connexion pendant 20 secondes
-            serverSocket.setSoTimeout(20000); // 20 secondes
-            Socket clientSocket = serverSocket.accept();
 
-            // Si une connexion est établie, continuer le processus d'envoi
-            System.out.println("Récepteur connecté !");
+    private static void sendFiles(Socket clientSocket) {
+        System.out.println("Connexion établie avec le récepteur, envoi des fichiers...");
+        try {
             InetAddress localAddress = InetAddress.getLocalHost();
             String senderIP = localAddress.getHostAddress();
             String senderHostName = InetAddress.getByName(senderIP).getHostName();
@@ -66,22 +87,17 @@ public class Envoyer {
                     outputStream.write(buffer, 0, bytesRead);
                 }
                 System.out.println("Fichier envoyé avec succès !");
-                jTabbedPane1.setSelectedIndex(5);
             }
-        } catch (SocketTimeoutException e) {
-            // Afficher un message d'erreur si aucun récepteur n'est connecté après 20 secondes
-            JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu dans les 20 secondes.", "Erreur", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private int generateRandomCode() {
-        Random random = new Random();
-        return 10000 + random.nextInt(90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
+    private static int generateRandomCode() {
+        return 10000 + (int)(Math.random() * 90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
     }
 
-    private File chooseFile() {
+    private static File chooseFile() {
         JFileChooser fileChooser = new JFileChooser();
         int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {

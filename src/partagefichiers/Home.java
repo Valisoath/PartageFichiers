@@ -60,6 +60,7 @@ public class Home extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         jPanel9 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
@@ -405,6 +406,8 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        jLabel17.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -421,6 +424,10 @@ public class Home extends javax.swing.JFrame {
                         .addGap(222, 222, 222)
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(247, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(16, 16, 16))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -431,7 +438,9 @@ public class Home extends javax.swing.JFrame {
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(33, 33, 33)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(145, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 102, Short.MAX_VALUE)
+                .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(16, 16, 16))
         );
 
         jTabbedPane1.addTab("tab2", jPanel4);
@@ -752,23 +761,23 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_option_AproposMouseReleased
     
     private void ecouteEnvoyer() {
-        jPanel9.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                // Désactiver le JPanel pendant l'envoi
-                jPanel9.setEnabled(false);
-                jLabel12.setEnabled(false);
-                // Lancer le processus d'envoi dans un thread séparé
-                new Thread(() -> {
-                    Envoyer send = new Envoyer();
-                    send.envoieFichier(jTabbedPane1);
-                    // Réactiver le JPanel une fois l'envoi terminé
-                    jPanel9.setEnabled(true);
-                    jLabel12.setEnabled(true);
-                }).start();
-            }
-        });
+//        jPanel9.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                super.mouseClicked(e);
+//                // Désactiver le JPanel pendant l'envoi
+//                jPanel9.setEnabled(false);
+//                jLabel12.setEnabled(false);
+//                // Lancer le processus d'envoi dans un thread séparé
+//                new Thread(() -> {
+//                    Envoyer send = new Envoyer();
+//                    send.envoieFichier(jTabbedPane1, jLabel17);
+//                    // Réactiver le JPanel une fois l'envoi terminé
+//                    jPanel9.setEnabled(true);
+//                    jLabel12.setEnabled(true);
+//                }).start();
+//            }
+//        });
     }
 
     /**
@@ -825,6 +834,7 @@ public class Home extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
