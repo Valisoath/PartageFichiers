@@ -570,7 +570,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Verdana" size="16" style="0"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Logiciel pour faciliter et securiser les transfere de donnee entre deux (02) ordinateurs"/>
+                    <Property name="text" type="java.lang.String" value="Logiciel pour faciliter et s&#xe9;curiser les transf&#xe8;re de donn&#xe9;e entre deux (02) ordinateurs"/>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -696,7 +696,7 @@
                           <Color blue="1f" green="1f" red="22" type="rgb"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="0"/>
-                        <Property name="text" type="java.lang.String" value="Partager de(s) fichier(s)"/>
+                        <Property name="text" type="java.lang.String" value="Partager le(s) fichier(s)"/>
                       </Properties>
                     </Component>
                   </SubComponents>
@@ -846,7 +846,7 @@
                       <Font name="Verdana" size="15" style="0"/>
                     </Property>
                     <Property name="horizontalAlignment" type="int" value="0"/>
-                    <Property name="text" type="java.lang.String" value="Developpeur : Valisoa Thierry (ENI) "/>
+                    <Property name="text" type="java.lang.String" value="D&#xe9;veloppeur : Valisoa Thierry (ENI) "/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="jLabel6">
@@ -940,12 +940,20 @@
                 <Container class="javax.swing.JPanel" name="jPanel11">
                   <Properties>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                      <Color blue="f8" green="f8" red="fc" type="rgb"/>
+                      <Color blue="f7" green="f7" red="f9" type="rgb"/>
+                    </Property>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                        <BevelBorder/>
+                      </Border>
                     </Property>
                     <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
                       <Color id="Curseur en forme de main"/>
                     </Property>
                   </Properties>
+                  <Events>
+                    <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jPanel11MouseReleased"/>
+                  </Events>
 
                   <Layout>
                     <DimensionLayout dim="0">
@@ -1010,9 +1018,9 @@
                           <Font name="Verdana" size="15" style="0"/>
                         </Property>
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="1f" green="1f" red="22" type="rgb"/>
+                          <Color blue="ff" green="33" red="33" type="rgb"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Fichier(s) envoye(s) avec succes."/>
+                        <Property name="text" type="java.lang.String" value="Fichier(s) envoy&#xe9;(s) avec succ&#xe8;s."/>
                       </Properties>
                     </Component>
                   </SubComponents>

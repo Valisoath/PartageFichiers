@@ -344,7 +344,7 @@ public class Home extends javax.swing.JFrame {
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/partage.png"))); // NOI18N
 
         jLabel8.setFont(new java.awt.Font("Verdana", 0, 16)); // NOI18N
-        jLabel8.setText("Logiciel pour faciliter et securiser les transfere de donnee entre deux (02) ordinateurs");
+        jLabel8.setText("Logiciel pour faciliter et sécuriser les transfère de donnée entre deux (02) ordinateurs");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -387,7 +387,7 @@ public class Home extends javax.swing.JFrame {
         jLabel12.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(34, 31, 31));
         jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel12.setText("Partager de(s) fichier(s)");
+        jLabel12.setText("Partager le(s) fichier(s)");
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -487,7 +487,7 @@ public class Home extends javax.swing.JFrame {
 
         jLabel5.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel5.setText("Developpeur : Valisoa Thierry (ENI) ");
+        jLabel5.setText("Développeur : Valisoa Thierry (ENI) ");
 
         jLabel6.setFont(new java.awt.Font("Verdana", 0, 10)); // NOI18N
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -536,8 +536,14 @@ public class Home extends javax.swing.JFrame {
 
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8_checked_100px.png"))); // NOI18N
 
-        jPanel11.setBackground(new java.awt.Color(252, 248, 248));
+        jPanel11.setBackground(new java.awt.Color(249, 247, 247));
+        jPanel11.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPanel11.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jPanel11.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jPanel11MouseReleased(evt);
+            }
+        });
 
         jLabel15.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jLabel15.setForeground(new java.awt.Color(34, 31, 31));
@@ -561,8 +567,8 @@ public class Home extends javax.swing.JFrame {
         );
 
         jLabel16.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
-        jLabel16.setForeground(new java.awt.Color(34, 31, 31));
-        jLabel16.setText("Fichier(s) envoye(s) avec succes.");
+        jLabel16.setForeground(new java.awt.Color(51, 51, 255));
+        jLabel16.setText("Fichier(s) envoyé(s) avec succès.");
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
@@ -759,25 +765,35 @@ public class Home extends javax.swing.JFrame {
         Icon_About.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icones/AboutBlack.png")));
         jTabbedPane1.setSelectedIndex(4);
     }//GEN-LAST:event_option_AproposMouseReleased
+
+    private void jPanel11MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel11MouseReleased
+        jTabbedPane1.setSelectedIndex(1);
+    }//GEN-LAST:event_jPanel11MouseReleased
     
     private void ecouteEnvoyer() {
-//        jPanel9.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                super.mouseClicked(e);
-//                // Désactiver le JPanel pendant l'envoi
-//                jPanel9.setEnabled(false);
-//                jLabel12.setEnabled(false);
-//                // Lancer le processus d'envoi dans un thread séparé
-//                new Thread(() -> {
-//                    Envoyer send = new Envoyer();
-//                    send.envoieFichier(jTabbedPane1, jLabel17);
-//                    // Réactiver le JPanel une fois l'envoi terminé
-//                    jPanel9.setEnabled(true);
-//                    jLabel12.setEnabled(true);
-//                }).start();
-//            }
-//        });
+        jPanel9.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                // Désactiver le JPanel pendant l'envoi
+                jPanel9.setEnabled(false);
+                jLabel12.setEnabled(false);
+                // Lancer le processus d'envoi dans un thread séparé
+                new Thread(() -> {
+                    try{
+                        Envoyer send = new Envoyer();
+                        send.envoieFichier(jTabbedPane1, jLabel17);
+                        // Réactiver le JPanel une fois l'envoi terminé
+                        jPanel9.setEnabled(true);
+                        jLabel12.setEnabled(true);
+                    }catch(Exception ex){
+                        jPanel9.setEnabled(true);
+                        jLabel12.setEnabled(true);
+                        jLabel17.setText("");
+                    }
+                }).start();
+            }
+        });
     }
 
     /**

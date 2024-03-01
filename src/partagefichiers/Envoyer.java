@@ -10,7 +10,7 @@ import java.net.*;
 
 public class Envoyer {
 
-    public static void main(String[] args) {
+    public void envoieFichier(JTabbedPane jTabbedPane1, JLabel jLabel) {
         final int PORT = 9998; // Port de l'envoyeur
         final int DISCOVERY_PORT = 9997; // Port de découverte
 
@@ -26,16 +26,20 @@ public class Envoyer {
             byte[] responseData = new byte[1024];
             DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
             try {
+                jLabel.setText("Attente d'un récepteur...");
                 socket.receive(responsePacket);
                 String receiverIP = responsePacket.getAddress().getHostAddress();
 
                 try (Socket serverSocket = new Socket(receiverIP, PORT)) {
                     // Connexion établie avec le récepteur, envoyer des fichiers
                     sendFiles(serverSocket);
+                    jTabbedPane1.setSelectedIndex(5);
+                    jLabel.setText("");
                 }
             } catch (SocketTimeoutException e) {
                 // Aucun récepteur connecté après 20 secondes
                 JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+                jLabel.setText("");
             }
         } catch (IOException e) {
 //            e.printStackTrace();
@@ -44,7 +48,7 @@ public class Envoyer {
     }
 
 
-    private static void sendFiles(Socket clientSocket) {
+    private void sendFiles(Socket clientSocket) {
         System.out.println("Connexion établie avec le récepteur, envoi des fichiers...");
         try {
             InetAddress localAddress = InetAddress.getLocalHost();
@@ -93,7 +97,7 @@ public class Envoyer {
         }
     }
 
-    private static int generateRandomCode() {
+    private int generateRandomCode() {
         return 10000 + (int)(Math.random() * 90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
     }
 
