@@ -6,6 +6,7 @@ package partagefichiers;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -775,26 +776,36 @@ public class Home extends javax.swing.JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+
+                // Vérifier si le JPanel est désactivé
+                if (!jPanel9.isEnabled()) {
+                    return; // Ignorer les clics si le JPanel est désactivé
+                }
+
                 // Désactiver le JPanel pendant l'envoi
                 jPanel9.setEnabled(false);
                 jLabel12.setEnabled(false);
+
                 // Lancer le processus d'envoi dans un thread séparé
                 new Thread(() -> {
-                    try{
+                    try {
                         Envoyer send = new Envoyer();
                         send.envoieFichier(jTabbedPane1, jLabel17);
-                        // Réactiver le JPanel une fois l'envoi terminé
-                        jPanel9.setEnabled(true);
-                        jLabel12.setEnabled(true);
-                    }catch(Exception ex){
-                        jPanel9.setEnabled(true);
-                        jLabel12.setEnabled(true);
-                        jLabel17.setText("");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        // Gérer l'exception
+                    } finally {
+                        // Réactiver le JPanel une fois l'envoi terminé, même en cas d'exception
+                        SwingUtilities.invokeLater(() -> {
+                            jPanel9.setEnabled(true);
+                            jLabel12.setEnabled(true);
+                        });
                     }
                 }).start();
             }
         });
     }
+
 
     /**
      * @param args the command line arguments
