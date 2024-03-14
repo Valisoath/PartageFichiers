@@ -15,34 +15,40 @@ public class Recevoir {
     private static final int DISCOVERY_PORT = 9997; // Port de découverte
 
     public static void main(String[] args) {
-        try (DatagramSocket serverSocket = new DatagramSocket(DISCOVERY_PORT)) {
-            System.out.println("En attente de découverte...");
+        VerifierConnecter connexionWifi = new VerifierConnecter();
+        
+        if (connexionWifi.isConnectedToWiFi()) {
+            try (DatagramSocket serverSocket = new DatagramSocket(DISCOVERY_PORT)) {
+                System.out.println("En attente de découverte...");
 
-            // Écoute des messages de découverte sur le port de découverte
-            byte[] receiveData = new byte[1024];
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
+                // Écoute des messages de découverte sur le port de découverte
+                byte[] receiveData = new byte[1024];
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                serverSocket.receive(receivePacket);
 
-            // Répondre au message de découverte avec l'adresse IP du récepteur
-            String senderIP = receivePacket.getAddress().getHostAddress();
-            byte[] responseData = senderIP.getBytes();
-            DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, receivePacket.getAddress(), receivePacket.getPort());
-            serverSocket.send(responsePacket);
+                // Répondre au message de découverte avec l'adresse IP du récepteur
+                String senderIP = receivePacket.getAddress().getHostAddress();
+                byte[] responseData = senderIP.getBytes();
+                DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, receivePacket.getAddress(), receivePacket.getPort());
+                serverSocket.send(responsePacket);
 
-            // Attendre les connexions entrantes sur le port du récepteur
-            try (ServerSocket receiverServerSocket = new ServerSocket(PORT)) {
-                System.out.println("En attente de connexion entrante...");
-                Socket clientSocket = receiverServerSocket.accept();
-                System.out.println("Connexion entrante établie avec : " + clientSocket.getInetAddress());
+                // Attendre les connexions entrantes sur le port du récepteur
+                try (ServerSocket receiverServerSocket = new ServerSocket(PORT)) {
+                    System.out.println("En attente de connexion entrante...");
+                    Socket clientSocket = receiverServerSocket.accept();
+                    System.out.println("Connexion entrante établie avec : " + clientSocket.getInetAddress());
 
-                // Traiter la connexion entrante dans un thread séparé
-                Thread clientThread = new Thread(new ClientHandler(clientSocket));
-                clientThread.start();
-            } catch (IOException e) {
-                e.printStackTrace();
+                    // Traiter la connexion entrante dans un thread séparé
+                    Thread clientThread = new Thread(new ClientHandler(clientSocket));
+                    clientThread.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } else {
+            JOptionPane.showMessageDialog(null, "Vérifier votre partage wifi", "Avertissement", JOptionPane.WARNING_MESSAGE);
         }
     }
 

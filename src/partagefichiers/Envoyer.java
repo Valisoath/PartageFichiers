@@ -20,49 +20,53 @@ public class Envoyer {
         long startTime = System.currentTimeMillis();
         boolean connected = false; // Variable pour suivre l'état de la connexion
 
-        try (DatagramSocket socket = new DatagramSocket()) {
-            // Émission du message de découverte
-            System.out.println("Attente d'un récepteur...");
+        VerifierConnecter connexionWifi = new VerifierConnecter();
+        if (connexionWifi.isConnectedToWiFi()) {
+            try (DatagramSocket socket = new DatagramSocket()) {
+                // Émission du message de découverte
+                System.out.println("Attente d'un récepteur...");
 
-            while (!connected && System.currentTimeMillis() - startTime < MAX_WAIT_TIME) {
-                byte[] requestData = "DISCOVER".getBytes();
-                DatagramPacket requestPacket = new DatagramPacket(requestData, requestData.length, InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT);
-                socket.send(requestPacket);
+                while (!connected && System.currentTimeMillis() - startTime < MAX_WAIT_TIME) {
+                    byte[] requestData = "DISCOVER".getBytes();
+                    DatagramPacket requestPacket = new DatagramPacket(requestData, requestData.length, InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT);
+                    socket.send(requestPacket);
 
-                // Attente de la réponse du récepteur pendant 1 seconde
-                socket.setSoTimeout(1000);
+                    // Attente de la réponse du récepteur pendant 1 seconde
+                    socket.setSoTimeout(1000);
 
-                byte[] responseData = new byte[1024];
-                DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
+                    byte[] responseData = new byte[1024];
+                    DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
 
-                try {
-                    jLabel.setText("Attente d'un récepteur...");
-                    socket.receive(responsePacket);
-                    String receiverIP = responsePacket.getAddress().getHostAddress();
+                    try {
+                        jLabel.setText("Attente d'un récepteur...");
+                        socket.receive(responsePacket);
+                        String receiverIP = responsePacket.getAddress().getHostAddress();
 
-                    try (Socket serverSocket = new Socket(receiverIP, PORT)) {
-                        // Connexion établie avec le récepteur, envoyer des fichiers
-                        sendFiles(serverSocket);
-                        jTabbedPane1.setSelectedIndex(5);
-                        jLabel.setText("");
-                        connected = true; // Indique que la connexion est établie
-                        break; // Sortir de la boucle si la connexion est établie
+                        try (Socket serverSocket = new Socket(receiverIP, PORT)) {
+                            // Connexion établie avec le récepteur, envoyer des fichiers
+                            sendFiles(serverSocket);
+                            jTabbedPane1.setSelectedIndex(5);
+                            jLabel.setText("");
+                            connected = true; // Indique que la connexion est établie
+                            break; // Sortir de la boucle si la connexion est établie
+                        }
+                    } catch (SocketTimeoutException ignored) {
+                        // Ignorer et réessayer
                     }
-                } catch (SocketTimeoutException ignored) {
-                    // Ignorer et réessayer
                 }
-            }
 
-            // Aucun récepteur connecté après la temporisation maximale
-            if (!connected && System.currentTimeMillis() - startTime >= MAX_WAIT_TIME) {
-                JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+                // Aucun récepteur connecté après la temporisation maximale
+                if (!connected && System.currentTimeMillis() - startTime >= MAX_WAIT_TIME) {
+                    JOptionPane.showMessageDialog(null, "Aucun récepteur n'a répondu.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+                    jLabel.setText("");
+                }
+
+            } catch (IOException e) {
                 jLabel.setText("");
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
+        } else {
             JOptionPane.showMessageDialog(null, "Vérifier votre partage wifi", "Avertissement", JOptionPane.WARNING_MESSAGE);
-            jLabel.setText("");
-            e.printStackTrace();
         }
     }
 
@@ -102,10 +106,11 @@ public class Envoyer {
                     OutputStream outputStream = clientSocket.getOutputStream();
                     while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                         outputStream.write(buffer, 0, bytesRead);
-                    }   System.out.println("Fichier envoyé avec succès !");
+                    }
+                    System.out.println("Fichier envoyé avec succès !");
                     // Fermeture du socket client après l'envoi du fichier
                 }
-                
+
                 // Pause pour libérer les ressources réseau
                 Thread.sleep(1000);
 
