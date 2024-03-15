@@ -44,7 +44,7 @@ public class Envoyer {
                         try (Socket serverSocket = new Socket(receiverIP, PORT)) {
                             // Connexion établie avec le récepteur, envoyer des fichiers
                             sendFiles(serverSocket);
-                            jTabbedPane1.setSelectedIndex(5);
+//                            jTabbedPane1.setSelectedIndex(5);
                             jLabel.setText("");
                             connected = true; // Indique que la connexion est établie
                             break; // Sortir de la boucle si la connexion est établie

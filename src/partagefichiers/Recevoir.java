@@ -4,20 +4,23 @@
  */
 package partagefichiers;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.zip.*;
-import javax.swing.*;
 
 public class Recevoir {
 
     private static final String DEFAULT_DOWNLOAD_FOLDER = System.getProperty("user.home") + File.separator + "Downloads";
     private static final int PORT = 9998; // Port du récepteur
     private static final int DISCOVERY_PORT = 9997; // Port de découverte
+    private JLabel fileListLabel; // JLabel pour afficher les fichiers reçus
 
-    public void recevoirFichier() {
+    public void recevoirFichier(JLabel fileListLabel) {
         VerifierConnecter connexionWifi = new VerifierConnecter();
-        
+        this.fileListLabel = fileListLabel;
+
         if (connexionWifi.isConnectedToWiFi()) {
             try (DatagramSocket serverSocket = new DatagramSocket(DISCOVERY_PORT)) {
                 System.out.println("En attente de découverte...");
@@ -38,7 +41,7 @@ public class Recevoir {
                     System.out.println("En attente de connexion entrante...");
                     Socket clientSocket = receiverServerSocket.accept();
                     System.out.println("Connexion entrante établie avec : " + clientSocket.getInetAddress());
-                    
+
                     // Traiter la connexion entrante dans un thread séparé
                     Thread clientThread = new Thread(new ClientHandler(clientSocket));
                     clientThread.start();
@@ -70,6 +73,8 @@ public class Recevoir {
                     defaultDownloadFolder.mkdirs();
                 }
 
+                StringBuilder fileListText = new StringBuilder();
+
                 try (ZipInputStream zipIn = new ZipInputStream(clientSocket.getInputStream())) {
                     ZipEntry entry;
                     while ((entry = zipIn.getNextEntry()) != null) {
@@ -82,9 +87,19 @@ public class Recevoir {
                                 fileOutputStream.write(buffer, 0, bytesRead);
                             }
                             System.out.println("Fichier reçu avec succès et enregistré à : " + fileToSave.getAbsolutePath());
+
+                            // Ajouter le nom du fichier à la liste des fichiers reçus
+                            fileListText.append(fileName).append("<br><br>");
                         }
                     }
                 }
+
+                // Mettre à jour le JLabel avec la liste des fichiers reçus
+                SwingUtilities.invokeLater(() -> {
+                    fileListLabel.setText("<html>" + fileListText.toString() + "</html>");
+                    fileListLabel.revalidate();
+                    fileListLabel.repaint();
+                });
 
             } catch (IOException e) {
                 e.printStackTrace();
