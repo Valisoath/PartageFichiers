@@ -4,11 +4,10 @@
  */
 package partagefichiers;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.zip.*;
+import javax.swing.*;
 
 public class Envoyer {
 
@@ -77,47 +76,49 @@ public class Envoyer {
             String senderIP = localAddress.getHostAddress();
             String senderHostName = InetAddress.getByName(senderIP).getHostName();
 
-            File selectedFile = chooseFile();
-            try (FileInputStream fileInputStream = new FileInputStream(selectedFile)) {
-                // Générer un code aléatoire de 5 chiffres
-                try (clientSocket) {
-                    // Générer un code aléatoire de 5 chiffres
-                    int randomCode = generateRandomCode();
-                    // Afficher le code dans une boîte de dialogue
-                    JOptionPane.showMessageDialog(null, "Votre code de transfert est : " + randomCode, "Code de transfert", JOptionPane.INFORMATION_MESSAGE);
-                    // Envoyer le code au récepteur
-                    DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
-                    dos.writeInt(randomCode);
-                    // Envoyer le nom de la machine de l'envoyeur avant le fichier
-                    dos.writeUTF(senderHostName);
-                    // Obtenir le nom du fichier sans extension
-                    String fileName = selectedFile.getName();
-                    String extension = "";
-                    int dotIndex = fileName.lastIndexOf('.');
-                    if (dotIndex != -1) {
-                        extension = fileName.substring(dotIndex);
-                        fileName = fileName.substring(0, dotIndex);
-                    }   // Envoyer le nom du fichier et son extension
-                    dos.writeUTF(fileName);
-                    dos.writeUTF(extension);
-                    // Envoyer le contenu du fichier au récepteur
-                    byte[] buffer = new byte[8192];
-                    int bytesRead;
-                    OutputStream outputStream = clientSocket.getOutputStream();
-                    while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
+            File[] selectedFiles = chooseFiles();
+
+            // Créer un fichier temporaire pour stocker les fichiers compressés
+            File tempZipFile = File.createTempFile("temp", ".zip");
+            try (FileOutputStream fileOutputStream = new FileOutputStream(tempZipFile); ZipOutputStream zipOut = new ZipOutputStream(fileOutputStream)) {
+
+                for (File selectedFile : selectedFiles) {
+                    try (FileInputStream fileInputStream = new FileInputStream(selectedFile)) {
+                        // Obtenir le nom du fichier sans extension
+                        String fileName = selectedFile.getName();
+                        // Créer une entrée dans le fichier ZIP pour ce fichier
+                        zipOut.putNextEntry(new ZipEntry(fileName));
+                        // Écrire le contenu du fichier dans le flux zip
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                            zipOut.write(buffer, 0, bytesRead);
+                        }
+                        System.out.println("Fichier compressé avec succès : " + fileName);
+                        // Fermer l'entrée ZIP courante
+                        zipOut.closeEntry();
                     }
-                    System.out.println("Fichier envoyé avec succès !");
-                    // Fermeture du socket client après l'envoi du fichier
                 }
-
-                // Pause pour libérer les ressources réseau
-                Thread.sleep(1000);
-
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Envoyer.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException e) {
+
+            // Envoyer le fichier ZIP au récepteur
+            try (FileInputStream tempFileInputStream = new FileInputStream(tempZipFile)) {
+                byte[] tempBuffer = new byte[8192];
+                int tempBytesRead;
+                OutputStream outputStream = clientSocket.getOutputStream();
+                while ((tempBytesRead = tempFileInputStream.read(tempBuffer)) != -1) {
+                    outputStream.write(tempBuffer, 0, tempBytesRead);
+                }
+                System.out.println("Fichier ZIP envoyé avec succès : " + tempZipFile.getName());
+            }
+
+            // Supprimer le fichier temporaire après l'envoi
+            tempZipFile.delete();
+
+            // Pause pour libérer les ressources réseau
+            Thread.sleep(1000);
+
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -126,11 +127,12 @@ public class Envoyer {
         return 10000 + (int) (Math.random() * 90000); // Génère un nombre aléatoire entre 10000 et 99999 inclus
     }
 
-    private static File chooseFile() {
+    private static File[] chooseFiles() {
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setMultiSelectionEnabled(true); // Permettre la sélection de plusieurs fichiers
         int result = fileChooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
-            return fileChooser.getSelectedFile();
+            return fileChooser.getSelectedFiles();
         } else {
             throw new RuntimeException("Aucun fichier sélectionné !");
         }
